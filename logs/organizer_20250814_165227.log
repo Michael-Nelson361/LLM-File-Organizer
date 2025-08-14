@@ -1,0 +1,11 @@
+2025-08-14 16:52:27,313 - file_organizer - INFO - Logging session started: 20250814_165227
+2025-08-14 16:52:27,314 - file_organizer - INFO - Log files: logs\organizer_20250814_165227.log, logs\conversations_20250814_165227.jsonl, logs\actions_20250814_165227.jsonl
+2025-08-14 16:52:38,923 - file_organizer - INFO - LLM response: {
+  "action": "list_directory",
+  "parameters": { },
+  "reasoning": "To provide a clear view of the current directory structure"
+}
+2025-08-14 16:52:38,924 - file_organizer - INFO - Executing action: list_directory with parameters: {}
+2025-08-14 16:52:38,933 - file_organizer - INFO - Reasoning: To provide a clear view of the current directory structure
+2025-08-14 16:52:38,935 - file_organizer - INFO - Listed directory: 
+2025-08-14 16:52:38,936 - file_organizer - INFO - Action result: {'items': [{'name': 'documents', 'path': 'documents', 'type': 'directory', 'size': None}, {'name': 'photos', 'path': 'photos', 'type': 'directory', 'size': None}, {'name': 'readme.txt', 'path': 'readme.txt', 'type': 'file', 'size': 21}, {'name': 'report.pdf', 'path': 'report.pdf', 'type': 'file', 'size': 11}]}

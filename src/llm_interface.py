@@ -63,15 +63,48 @@ class AnthropicInterface(LLMInterface):
             raise Exception(f"Anthropic API error: {str(e)}")
 
 class OllamaInterface(LLMInterface):
-    def __init__(self, model: str = "llama3.2", base_url: str = "http://localhost:11434"):
-        self.model = model
+    def __init__(self, model: str = "auto", base_url: str = "http://localhost:11434"):
         self.base_url = base_url.rstrip('/')
         
-        # Test connection to Ollama
+        # Test connection to Ollama and get available models
         try:
             response = requests.get(f"{self.base_url}/api/tags", timeout=5)
             if response.status_code != 200:
                 raise Exception(f"Ollama server not responding. Status: {response.status_code}")
+            
+            # Get available models
+            models_data = response.json()
+            available_models = [m.get("name", "") for m in models_data.get("models", [])]
+            
+            if not available_models:
+                raise Exception("No models available in Ollama. Please install a model first: ollama pull llama3.2")
+            
+            # Auto-select model if not specified
+            if model == "auto" or model == "llama3.2":
+                # Prefer specific models in order of preference
+                preferred_models = ["llama3.2:3b", "llama3.2:1b", "llama3.2", "llama3.1", "mistral", "codellama"]
+                
+                self.model = None
+                for preferred in preferred_models:
+                    for available in available_models:
+                        if preferred in available:
+                            self.model = available
+                            break
+                    if self.model:
+                        break
+                
+                # If no preferred model found, use the first available
+                if not self.model:
+                    self.model = available_models[0]
+                
+                print(f"Auto-selected Ollama model: {self.model}")
+            else:
+                # Use specified model
+                self.model = model
+                # Verify the model exists
+                if not any(model in available for available in available_models):
+                    raise Exception(f"Model '{model}' not found. Available models: {', '.join(available_models)}")
+            
         except requests.exceptions.RequestException as e:
             raise Exception(f"Cannot connect to Ollama at {self.base_url}. Make sure Ollama is running. Error: {str(e)}")
     
@@ -268,7 +301,11 @@ When you want to perform an action, respond with a JSON object in this format:
 
 For conversation/questions, respond normally without JSON.
 
-Always explain what you're doing and ask for confirmation before making significant changes."""
+IMPORTANT BEHAVIORAL NOTES:
+- When users ask about filesystem structure, current contents, or "what's here", immediately use list_directory to show them
+- For informational queries (like "show me", "what files", "structure"), no confirmation needed
+- Only ask for confirmation before making changes (moving, renaming, creating, deleting)
+- Be helpful and proactive with safe informational actions"""
 
     def _add_to_history(self, role: str, content: str):
         self.conversation_history.append({"role": role, "content": content})

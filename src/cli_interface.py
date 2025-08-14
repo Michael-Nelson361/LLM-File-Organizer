@@ -56,7 +56,7 @@ class CLIInterface:
         
         elif provider == "ollama":
             return OllamaInterface(
-                model=model or "llama3.2",
+                model=model or "auto",
                 base_url=base_url or "http://localhost:11434"
             )
         

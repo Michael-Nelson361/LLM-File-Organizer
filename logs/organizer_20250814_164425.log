@@ -1,0 +1,4 @@
+2025-08-14 16:44:25,213 - file_organizer - INFO - Logging session started: 20250814_164425
+2025-08-14 16:44:25,214 - file_organizer - INFO - Log files: logs\organizer_20250814_164425.log, logs\conversations_20250814_164425.jsonl, logs\actions_20250814_164425.jsonl
+2025-08-14 16:44:25,215 - file_organizer - INFO - Listed directory: 
+2025-08-14 16:44:25,217 - file_organizer - INFO - Created directory: test_folder

@@ -1,0 +1,6 @@
+2025-08-14 16:47:15,274 - file_organizer - INFO - Logging session started: 20250814_164715
+2025-08-14 16:47:15,276 - file_organizer - INFO - Log files: logs\organizer_20250814_164715.log, logs\conversations_20250814_164715.jsonl, logs\actions_20250814_164715.jsonl
+2025-08-14 16:47:15,278 - file_organizer - INFO - Root path validation successful: C:\Users\Nelson_A\OneDrive\Documents\Financial Statements
+2025-08-14 16:47:17,334 - file_organizer - INFO - CLI initialized with root path: C:\Users\Nelson_A\OneDrive\Documents\Financial Statements
+2025-08-14 16:47:17,335 - file_organizer - INFO - LLM provider: ollama, model: None
+2025-08-14 16:47:41,971 - file_organizer - ERROR - Error processing request: Ollama API error: Ollama API error: 404 - {"error":"model 'llama3.2' not found"}
