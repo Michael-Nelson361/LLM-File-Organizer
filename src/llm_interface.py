@@ -1,5 +1,6 @@
 import json
 import logging
+import requests
 from typing import Dict, List, Optional, Any
 from abc import ABC, abstractmethod
 
@@ -60,6 +61,175 @@ class AnthropicInterface(LLMInterface):
             return response.content[0].text
         except Exception as e:
             raise Exception(f"Anthropic API error: {str(e)}")
+
+class OllamaInterface(LLMInterface):
+    def __init__(self, model: str = "llama3.2", base_url: str = "http://localhost:11434"):
+        self.model = model
+        self.base_url = base_url.rstrip('/')
+        
+        # Test connection to Ollama
+        try:
+            response = requests.get(f"{self.base_url}/api/tags", timeout=5)
+            if response.status_code != 200:
+                raise Exception(f"Ollama server not responding. Status: {response.status_code}")
+        except requests.exceptions.RequestException as e:
+            raise Exception(f"Cannot connect to Ollama at {self.base_url}. Make sure Ollama is running. Error: {str(e)}")
+    
+    def generate_response(self, messages: List[Dict[str, str]]) -> str:
+        try:
+            # Convert messages to Ollama format
+            prompt = self._messages_to_prompt(messages)
+            
+            payload = {
+                "model": self.model,
+                "prompt": prompt,
+                "stream": False,
+                "options": {
+                    "temperature": 0.1,
+                    "num_predict": 1000
+                }
+            }
+            
+            response = requests.post(
+                f"{self.base_url}/api/generate",
+                json=payload,
+                timeout=30
+            )
+            
+            if response.status_code != 200:
+                raise Exception(f"Ollama API error: {response.status_code} - {response.text}")
+            
+            result = response.json()
+            return result.get("response", "").strip()
+            
+        except Exception as e:
+            raise Exception(f"Ollama API error: {str(e)}")
+    
+    def _messages_to_prompt(self, messages: List[Dict[str, str]]) -> str:
+        prompt_parts = []
+        
+        for msg in messages:
+            role = msg["role"]
+            content = msg["content"]
+            
+            if role == "system":
+                prompt_parts.append(f"System: {content}")
+            elif role == "user":
+                prompt_parts.append(f"User: {content}")
+            elif role == "assistant":
+                prompt_parts.append(f"Assistant: {content}")
+        
+        prompt_parts.append("Assistant:")
+        return "\n\n".join(prompt_parts)
+
+class LMStudioInterface(LLMInterface):
+    def __init__(self, model: str = "local-model", base_url: str = "http://localhost:1234"):
+        self.model = model
+        self.base_url = base_url.rstrip('/')
+        
+        # Test connection to LM Studio
+        try:
+            response = requests.get(f"{self.base_url}/v1/models", timeout=5)
+            if response.status_code != 200:
+                raise Exception(f"LM Studio server not responding. Status: {response.status_code}")
+        except requests.exceptions.RequestException as e:
+            raise Exception(f"Cannot connect to LM Studio at {self.base_url}. Make sure LM Studio is running with local server enabled. Error: {str(e)}")
+    
+    def generate_response(self, messages: List[Dict[str, str]]) -> str:
+        try:
+            payload = {
+                "model": self.model,
+                "messages": messages,
+                "temperature": 0.1,
+                "max_tokens": 1000
+            }
+            
+            response = requests.post(
+                f"{self.base_url}/v1/chat/completions",
+                json=payload,
+                timeout=30
+            )
+            
+            if response.status_code != 200:
+                raise Exception(f"LM Studio API error: {response.status_code} - {response.text}")
+            
+            result = response.json()
+            return result["choices"][0]["message"]["content"].strip()
+            
+        except Exception as e:
+            raise Exception(f"LM Studio API error: {str(e)}")
+
+class HuggingFaceLocalInterface(LLMInterface):
+    def __init__(self, model: str = "microsoft/DialoGPT-medium"):
+        self.model_name = model
+        self.model = None
+        self.tokenizer = None
+        
+        try:
+            from transformers import AutoTokenizer, AutoModelForCausalLM
+            import torch
+            
+            print(f"Loading model {model}... This may take a few minutes on first run.")
+            self.tokenizer = AutoTokenizer.from_pretrained(model)
+            self.model = AutoModelForCausalLM.from_pretrained(model)
+            
+            # Add padding token if not present
+            if self.tokenizer.pad_token is None:
+                self.tokenizer.pad_token = self.tokenizer.eos_token
+            
+            print("Model loaded successfully!")
+            
+        except ImportError:
+            raise ImportError("Transformers library not installed. Run: pip install transformers torch")
+        except Exception as e:
+            raise Exception(f"Failed to load HuggingFace model {model}: {str(e)}")
+    
+    def generate_response(self, messages: List[Dict[str, str]]) -> str:
+        try:
+            import torch
+            
+            # Convert messages to prompt
+            prompt = self._messages_to_prompt(messages)
+            
+            # Tokenize
+            inputs = self.tokenizer.encode(prompt, return_tensors="pt", max_length=512, truncation=True)
+            
+            # Generate
+            with torch.no_grad():
+                outputs = self.model.generate(
+                    inputs,
+                    max_length=inputs.shape[1] + 200,
+                    temperature=0.7,
+                    do_sample=True,
+                    pad_token_id=self.tokenizer.eos_token_id
+                )
+            
+            # Decode response
+            response = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
+            
+            # Extract only the new part
+            response = response[len(prompt):].strip()
+            
+            return response if response else "I understand, but I need more context to provide a specific response."
+            
+        except Exception as e:
+            raise Exception(f"HuggingFace local model error: {str(e)}")
+    
+    def _messages_to_prompt(self, messages: List[Dict[str, str]]) -> str:
+        prompt_parts = []
+        
+        for msg in messages:
+            role = msg["role"]
+            content = msg["content"]
+            
+            if role == "system":
+                prompt_parts.append(f"System: {content}")
+            elif role == "user":
+                prompt_parts.append(f"Human: {content}")
+            elif role == "assistant":
+                prompt_parts.append(f"Assistant: {content}")
+        
+        return "\n".join(prompt_parts) + "\nAssistant:"
 
 class FilesystemLLM:
     def __init__(self, llm_interface: LLMInterface, filesystem_ops, logger: logging.Logger):
@@ -187,13 +357,13 @@ Always explain what you're doing and ask for confirmation before making signific
             if action_data:
                 result = self._execute_action(action_data)
                 if "error" in result:
-                    response_parts.append(f"❌ Error: {result['error']}")
+                    response_parts.append(f"[ERROR] {result['error']}")
                 elif "success" in result:
-                    response_parts.append(f"✅ {result['message']}")
+                    response_parts.append(f"[OK] {result['message']}")
                 else:
                     # For list_directory or get_file_info, format the output nicely
                     if action_data.get("action") == "list_directory" and "items" in result:
-                        items_str = "\n".join([f"{'📁' if item['type'] == 'directory' else '📄'} {item['name']}" 
+                        items_str = "\n".join([f"{'[DIR]' if item['type'] == 'directory' else '[FILE]'} {item['name']}" 
                                              for item in result["items"]])
                         response_parts.append(f"Directory contents:\n{items_str}")
                     else:

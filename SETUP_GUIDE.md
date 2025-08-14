@@ -7,29 +7,33 @@
 pip install -r requirements.txt
 ```
 
-### 2. Set Up API Key
-Create a `.env` file in the project directory:
+### 2. Choose Your LLM Option
+
+**Option A: Local LLM (Recommended - No API Key Required)**
 ```bash
-cp .env.example .env
+# Install Ollama from https://ollama.ai/
+ollama pull llama3.2
+
+# Run with local LLM
+python main.py --root-path /path/to/organize --llm-provider ollama
 ```
 
-Edit `.env` and add your API key:
-```env
-# For OpenAI
-OPENAI_API_KEY=your_openai_api_key_here
+**Option B: Cloud LLM (Requires API Key)**
+```bash
+# Create .env file
+cp .env.example .env
 
-# For Anthropic
-ANTHROPIC_API_KEY=your_anthropic_api_key_here
+# Edit .env and add your API key:
+# OPENAI_API_KEY=your_openai_api_key_here
+# ANTHROPIC_API_KEY=your_anthropic_api_key_here
+
+# Run with cloud LLM
+python main.py --root-path /path/to/organize --llm-provider openai
 ```
 
 ### 3. Test Installation
 ```bash
 python test_installation.py
-```
-
-### 4. Run the Program
-```bash
-python main.py --root-path /path/to/organize --llm-provider openai
 ```
 
 ## Troubleshooting

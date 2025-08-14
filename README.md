@@ -5,7 +5,10 @@ An intelligent filesystem management tool that uses Large Language Models (LLMs)
 ## Features
 
 - **Natural Language Interface**: Give instructions like "organize my photos by year" or "move all PDFs to a documents folder"
-- **Multi-LLM Support**: Works with OpenAI GPT models and Anthropic Claude
+- **Multiple LLM Options**: 
+  - **Local LLMs**: Ollama, LM Studio, HuggingFace (no API keys required!)
+  - **Cloud LLMs**: OpenAI GPT models and Anthropic Claude
+- **Complete Privacy**: Use local LLMs for 100% offline operation
 - **Strict Safety Constraints**: 
   - Cannot delete files (only move, rename, create folders)
   - Cannot work outside specified directory
@@ -38,6 +41,19 @@ cp .env.example .env
 
 ### Basic Usage
 
+**Local LLM (Recommended - No API Key Required):**
+```bash
+# With Ollama (requires Ollama to be running)
+python main.py --root-path /path/to/organize --llm-provider ollama
+
+# With LM Studio (requires LM Studio local server)
+python main.py --root-path /path/to/organize --llm-provider lmstudio
+
+# With HuggingFace (downloads model automatically)
+python main.py --root-path /path/to/organize --llm-provider huggingface
+```
+
+**Cloud LLM (Requires API Key):**
 ```bash
 python main.py --root-path /path/to/organize --llm-provider openai
 ```
@@ -45,9 +61,10 @@ python main.py --root-path /path/to/organize --llm-provider openai
 ### Command Line Options
 
 - `--root-path, -r`: Directory where the organizer can operate (required)
-- `--llm-provider, -p`: LLM provider to use (`openai` or `anthropic`)
+- `--llm-provider, -p`: LLM provider (`ollama`, `lmstudio`, `huggingface`, `openai`, `anthropic`)
 - `--model, -m`: Specific model to use (optional)
-- `--api-key, -k`: API key (or set via environment variable)
+- `--api-key, -k`: API key for cloud providers (or set via environment variable)
+- `--base-url, -u`: Base URL for local LLM servers (Ollama/LM Studio)
 - `--env-file, -e`: Path to environment file (default: `.env`)
 
 ### Example Commands
@@ -146,6 +163,18 @@ python -m pytest tests/
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
+## Getting Started with Local LLMs
+
+For the best privacy and no API costs, we recommend using local LLMs:
+
+### 🚀 Quick Start with Ollama (Easiest)
+
+1. **Install Ollama**: Download from https://ollama.ai/
+2. **Pull a model**: `ollama pull llama3.2`
+3. **Run the organizer**: `python main.py --root-path "~/Downloads" --llm-provider ollama`
+
+**See [LOCAL_LLM_SETUP.md](LOCAL_LLM_SETUP.md) for detailed setup instructions.**
+
 ## Security Notice
 
 This tool is designed with safety as the primary concern. It cannot delete files and operates with strict constraints. However, always:
@@ -154,6 +183,7 @@ This tool is designed with safety as the primary concern. It cannot delete files
 - Keep backups of important data
 - Review the logs after each session
 - Report any security concerns
+- **Benefit**: Local LLMs provide complete privacy - no data leaves your machine!
 
 ## Support
 
