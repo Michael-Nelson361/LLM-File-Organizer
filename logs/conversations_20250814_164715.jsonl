@@ -1,2 +1,0 @@
-{"timestamp": "2025-08-14T16:47:41.972211", "session_id": "20250814_164715", "user_input": "What is the structure of this filesystem?", "assistant_response": "Error processing request: Ollama API error: Ollama API error: 404 - {\"error\":\"model 'llama3.2' not found\"}", "metadata": {}}
-{"timestamp": "2025-08-14T16:54:50.297437", "session_id": "20250814_164715", "user_input": "What is the structure of this filesystem?", "assistant_response": "Error processing request: Ollama API error: Ollama API error: 404 - {\"error\":\"model 'llama3.2' not found\"}", "metadata": {}}

@@ -1,5 +1,0 @@
-2025-08-14 16:36:49,101 - file_organizer - INFO - Logging session started: 20250814_163649
-2025-08-14 16:36:49,101 - file_organizer - INFO - Log files: logs\organizer_20250814_163649.log, logs\conversations_20250814_163649.jsonl, logs\actions_20250814_163649.jsonl
-2025-08-14 16:36:49,102 - file_organizer - INFO - Root path validation successful: C:\Users\Nelson_A\OneDrive\Documents\Projects\LLM-File-Organizer\test_folder
-2025-08-14 16:36:51,191 - file_organizer - INFO - CLI initialized with root path: C:\Users\Nelson_A\OneDrive\Documents\Projects\LLM-File-Organizer\test_folder
-2025-08-14 16:36:51,191 - file_organizer - INFO - LLM provider: ollama, model: None
