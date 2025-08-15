@@ -108,52 +108,97 @@ class OllamaInterface(LLMInterface):
         except requests.exceptions.RequestException as e:
             raise Exception(f"Cannot connect to Ollama at {self.base_url}. Make sure Ollama is running. Error: {str(e)}")
     
-    def generate_response(self, messages: List[Dict[str, str]]) -> str:
-        try:
-            # Convert messages to Ollama format
-            prompt = self._messages_to_prompt(messages)
-            
-            payload = {
-                "model": self.model,
-                "prompt": prompt,
-                "stream": False,
-                "options": {
-                    "temperature": 0.1,
-                    "num_predict": 1000
+    def generate_response(self, messages: List[Dict[str, str]], retry_count: int = 2) -> str:
+        import time
+        
+        for attempt in range(retry_count + 1):
+            try:
+                # Convert messages to Ollama format
+                prompt = self._messages_to_prompt(messages)
+                
+                # Optimize payload for better performance
+                payload = {
+                    "model": self.model,
+                    "prompt": prompt,
+                    "stream": False,
+                    "options": {
+                        "temperature": 0.1,
+                        "num_predict": 800,  # Reduced for faster responses
+                        "top_p": 0.9,
+                        "stop": ["\n\nUser:", "\n\nHuman:"]  # Stop tokens to prevent overgeneration
+                    }
                 }
-            }
-            
-            response = requests.post(
-                f"{self.base_url}/api/generate",
-                json=payload,
-                timeout=30
-            )
-            
-            if response.status_code != 200:
-                raise Exception(f"Ollama API error: {response.status_code} - {response.text}")
-            
-            result = response.json()
-            return result.get("response", "").strip()
-            
-        except Exception as e:
-            raise Exception(f"Ollama API error: {str(e)}")
+                
+                # Use progressive timeout: shorter for first attempts, longer for final
+                timeout = 60 if attempt < retry_count else 120
+                
+                response = requests.post(
+                    f"{self.base_url}/api/generate",
+                    json=payload,
+                    timeout=timeout
+                )
+                
+                if response.status_code != 200:
+                    raise Exception(f"Ollama API error: {response.status_code} - {response.text}")
+                
+                result = response.json()
+                response_text = result.get("response", "").strip()
+                
+                if response_text:
+                    return response_text
+                else:
+                    raise Exception("Empty response from Ollama")
+                    
+            except requests.exceptions.Timeout as e:
+                if attempt < retry_count:
+                    print(f"Ollama timeout (attempt {attempt + 1}/{retry_count + 1}), retrying in 2 seconds...")
+                    time.sleep(2)
+                    continue
+                else:
+                    raise Exception(f"Ollama timeout after {retry_count + 1} attempts. Try a simpler query or restart Ollama.")
+                    
+            except requests.exceptions.ConnectionError as e:
+                raise Exception(f"Cannot connect to Ollama. Is it running? Try: ollama serve")
+                
+            except Exception as e:
+                if attempt < retry_count and "timeout" in str(e).lower():
+                    print(f"Ollama error (attempt {attempt + 1}/{retry_count + 1}), retrying...")
+                    time.sleep(1)
+                    continue
+                else:
+                    raise Exception(f"Ollama API error: {str(e)}")
+        
+        # Should never reach here, but just in case
+        raise Exception("All retry attempts failed")
     
     def _messages_to_prompt(self, messages: List[Dict[str, str]]) -> str:
         prompt_parts = []
         
-        for msg in messages:
+        # Optimize: Keep only essential parts to reduce prompt length
+        system_content = ""
+        recent_messages = messages[-6:]  # Only keep last 6 messages for context
+        
+        for msg in recent_messages:
             role = msg["role"]
             content = msg["content"]
             
             if role == "system":
-                prompt_parts.append(f"System: {content}")
+                # Compress system prompt for faster processing
+                system_content = content[:500] + "..." if len(content) > 500 else content
             elif role == "user":
                 prompt_parts.append(f"User: {content}")
             elif role == "assistant":
-                prompt_parts.append(f"Assistant: {content}")
+                # Keep assistant responses shorter in context
+                short_content = content[:200] + "..." if len(content) > 200 else content
+                prompt_parts.append(f"Assistant: {short_content}")
         
-        prompt_parts.append("Assistant:")
-        return "\n\n".join(prompt_parts)
+        # Build optimized prompt
+        if system_content:
+            final_prompt = f"System: {system_content}\n\n" + "\n\n".join(prompt_parts) + "\n\nAssistant:"
+        else:
+            final_prompt = "\n\n".join(prompt_parts) + "\n\nAssistant:"
+        
+        return final_prompt
 
 class LMStudioInterface(LLMInterface):
     def __init__(self, model: str = "local-model", base_url: str = "http://localhost:1234"):
@@ -307,13 +352,20 @@ IMPORTANT BEHAVIORAL NOTES:
 - When users ask about filesystem structure, current contents, or "what's here", immediately use list_directory to show them
 - For informational queries (like "show me", "what files", "structure"), no confirmation needed
 - Only ask for confirmation before making changes (moving, renaming, creating, deleting)
-- Be helpful and proactive with safe informational actions"""
+- Be helpful and proactive with safe informational actions
+- For date-based queries (like "files in 2016" or "what files from 2020"), immediately list directory contents first, then analyze the file names for date patterns
+- Keep responses concise and focused to avoid timeout issues
+- When users ask about specific years/dates, be proactive and show them what files exist"""
 
     def _add_to_history(self, role: str, content: str):
+        # Truncate very long content to prevent timeouts
+        if len(content) > 1000:
+            content = content[:1000] + "... [truncated for performance]"
+        
         self.conversation_history.append({"role": role, "content": content})
-        # Keep only last 10 messages to manage context length
-        if len(self.conversation_history) > 10:
-            self.conversation_history = self.conversation_history[-10:]
+        # Keep only last 6 messages to manage context length and improve performance
+        if len(self.conversation_history) > 6:
+            self.conversation_history = self.conversation_history[-6:]
     
     def _parse_llm_response(self, response: str) -> tuple[Optional[Dict], Optional[str]]:
         response = response.strip()
