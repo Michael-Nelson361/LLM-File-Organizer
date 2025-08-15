@@ -1,0 +1,15 @@
+2025-08-14 17:17:08,423 - file_organizer - INFO - Logging session started: 20250814_171708
+2025-08-14 17:17:08,423 - file_organizer - INFO - Log files: logs\organizer_20250814_171708.log, logs\conversations_20250814_171708.jsonl, logs\actions_20250814_171708.jsonl
+2025-08-14 17:17:08,425 - file_organizer - WARNING - Destination exists, auto-renamed to: existing (1).txt
+2025-08-14 17:17:08,427 - file_organizer - INFO - Moved file with auto-rename: source.txt -> existing (1).txt (original destination existed)
+2025-08-14 17:17:08,475 - file_organizer - WARNING - Destination directory exists, auto-renamed to: folder2 (1)
+2025-08-14 17:17:08,478 - file_organizer - INFO - Moved directory with auto-rename: folder1 -> folder2 (1) (original destination existed)
+2025-08-14 17:17:08,486 - file_organizer - INFO - Moved file: bulk_test_0.txt -> C:\Users\Nelson_A\AppData\Local\Temp\tmpntu3jw3a\documents\bulk_test_0.txt
+2025-08-14 17:17:08,487 - file_organizer - WARNING - Destination exists, auto-renamed to: documents\bulk_test_1 (1).txt
+2025-08-14 17:17:08,489 - file_organizer - INFO - Moved file with auto-rename: bulk_test_1.txt -> documents\bulk_test_1 (1).txt (original destination existed)
+2025-08-14 17:17:08,492 - file_organizer - INFO - Moved file: bulk_test_2.txt -> C:\Users\Nelson_A\AppData\Local\Temp\tmpntu3jw3a\documents\bulk_test_2.txt
+2025-08-14 17:17:08,493 - file_organizer - INFO - Bulk move completed: 2 moved, 1 renamed, 0 errors
+2025-08-14 17:17:08,504 - file_organizer - INFO - Logging session started: 20250814_171708
+2025-08-14 17:17:08,505 - file_organizer - INFO - Log files: logs\organizer_20250814_171708.log, logs\conversations_20250814_171708.jsonl, logs\actions_20250814_171708.jsonl
+2025-08-14 17:17:08,507 - file_organizer - WARNING - Destination exists, auto-renamed to: test2 (1).txt
+2025-08-14 17:17:08,509 - file_organizer - INFO - Moved file with auto-rename: test1.txt -> test2 (1).txt (original destination existed)

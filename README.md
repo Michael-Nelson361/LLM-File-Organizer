@@ -13,7 +13,9 @@ An intelligent filesystem management tool that uses Large Language Models (LLMs)
   - Cannot delete files (only move, rename, create folders)
   - Cannot work outside specified directory
   - Cannot touch system directories
+  - **Automatic overwrite protection** - files are auto-renamed if conflicts exist
   - Comprehensive path validation and security checks
+  - Preview functionality to show conflicts before moving
 - **Complete Logging**: All actions and conversations are logged with timestamps
 - **Interactive CLI**: Colorful, user-friendly command-line interface
 - **Real-time Validation**: Every operation is validated before execution
@@ -91,11 +93,13 @@ The LLM File Organizer includes multiple layers of security:
 
 ### What the AI CAN do:
 - List and explore directory contents
-- Move files and folders
+- Move files and folders (with automatic conflict resolution)
 - Rename files and folders
 - Create new directories
 - Remove empty directories
 - Provide file and folder information
+- Preview move operations before executing
+- Bulk move operations with safety checks
 
 ### What the AI CANNOT do:
 - Delete or remove files
@@ -104,14 +108,17 @@ The LLM File Organizer includes multiple layers of security:
 - Access system directories
 - Execute arbitrary commands
 - Modify file contents
+- **Overwrite existing files** (auto-renames instead)
 
 ### Security Measures:
+- **Automatic overwrite protection** - files renamed to avoid conflicts
 - Path traversal prevention
 - System directory protection
 - Dangerous pattern detection
 - Action validation
-- Comprehensive logging
+- Comprehensive logging with safety events
 - Input sanitization
+- Move preview functionality
 
 ## Project Structure
 
@@ -142,6 +149,31 @@ All activities are logged in multiple formats:
 - **Security Events**: Security-related events and blocked actions
 
 Logs are stored in the `logs/` directory with session timestamps.
+
+## Overwrite Protection
+
+**Critical Safety Feature:** The system includes comprehensive protection against accidental file overwrites:
+
+### How It Works:
+1. **Automatic Detection**: Before any move operation, the system checks if a file already exists at the destination
+2. **Auto-Renaming**: If a conflict is detected, files are automatically renamed using the pattern `filename (1).txt`, `filename (2).txt`, etc.
+3. **Preservation**: Original files are NEVER overwritten or lost
+4. **Logging**: All conflict resolutions are logged with warnings for audit purposes
+
+### Example:
+```
+User: "Move document.txt to archive/document.txt"
+
+If archive/document.txt already exists:
+- Original archive/document.txt → preserved unchanged
+- document.txt → moved to archive/document (1).txt  
+- User notified: "Moved document.txt to archive/document (1).txt (renamed to avoid overwrite)"
+```
+
+### Safety Options:
+- **Default behavior**: Auto-rename to prevent overwrites
+- **Strict mode**: Operations fail if conflicts detected (prevents any changes)
+- **Preview mode**: See potential conflicts before making changes
 
 ## Development
 

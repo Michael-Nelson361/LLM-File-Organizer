@@ -285,12 +285,14 @@ CRITICAL SAFETY RULES - YOU MUST NEVER VIOLATE THESE:
 
 AVAILABLE FUNCTIONS:
 - list_directory(path): Show contents of a directory
-- move_file(source, destination): Move a file to new location
-- move_directory(source, destination): Move a directory to new location
+- move_file(source, destination): Move a file to new location (auto-renames if destination exists)
+- move_directory(source, destination): Move a directory to new location (auto-renames if destination exists)
 - rename_file(old_name, new_name): Rename a file or folder
 - create_directory(path): Create a new directory
 - remove_empty_directory(path): Remove an empty directory only
 - get_file_info(path): Get detailed info about a file or folder
+- get_move_preview(source, destination): Preview what would happen in a move operation
+- bulk_move_files(patterns, destination): Move multiple files matching patterns safely
 
 When you want to perform an action, respond with a JSON object in this format:
 {
@@ -352,7 +354,9 @@ IMPORTANT BEHAVIORAL NOTES:
             "rename_file": self.fs_ops.rename_file,
             "create_directory": self.fs_ops.create_directory,
             "remove_empty_directory": self.fs_ops.remove_empty_directory,
-            "get_file_info": self.fs_ops.get_file_info
+            "get_file_info": self.fs_ops.get_file_info,
+            "get_move_preview": self.fs_ops.get_move_preview,
+            "bulk_move_files": self.fs_ops.bulk_move_files
         }
         
         if action not in action_map:
