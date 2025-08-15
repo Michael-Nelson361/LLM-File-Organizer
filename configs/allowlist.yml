@@ -1,0 +1,12 @@
+﻿# Example allowlist of extensions and directories
+extensions:
+  - .txt
+  - .pdf
+  - .jpg
+  - .png
+  - .md
+  - .docx
+directories:
+  - Downloads
+  - Documents
+  - Pictures

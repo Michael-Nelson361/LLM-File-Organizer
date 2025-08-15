@@ -1,0 +1,23 @@
+﻿{
+  "\": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Plan",
+  "type": "object",
+  "required": ["plan_id", "ops"],
+  "properties": {
+    "plan_id": { "type": "string" },
+    "ops": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          { "type": "object", "required": ["MOVE","src","dst"],   "properties": { "MOVE": { "const": true }, "src": { "type": "string" }, "dst": { "type": "string" } } },
+          { "type": "object", "required": ["RENAME","src","dst"], "properties": { "RENAME": { "const": true }, "src": { "type": "string" }, "dst": { "type": "string" } } },
+          { "type": "object", "required": ["COPY","src","dst"],   "properties": { "COPY": { "const": true }, "src": { "type": "string" }, "dst": { "type": "string" } } },
+          { "type": "object", "required": ["MKDIR","path"],       "properties": { "MKDIR": { "const": true }, "path": { "type": "string" } } },
+          { "type": "object", "required": ["RMDIR","path"],       "properties": { "RMDIR": { "const": true }, "path": { "type": "string" } } }
+        ]
+      }
+    },
+    "preconditions": { "type": "array", "items": { "type": "string" } },
+    "postconditions": { "type": "array", "items": { "type": "string" } }
+  }
+}

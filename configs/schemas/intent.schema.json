@@ -1,0 +1,13 @@
+﻿{
+  "\": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Intent",
+  "type": "object",
+  "required": ["intent_type", "root"],
+  "properties": {
+    "intent_type": { "enum": ["describe", "organize", "transform"] },
+    "root": { "type": "string" },
+    "goals": { "type": "array", "items": { "type": "string" } },
+    "constraints": { "type": "object" },
+    "preview_only": { "type": "boolean" }
+  }
+}

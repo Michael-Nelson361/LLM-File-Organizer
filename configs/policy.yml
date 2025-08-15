@@ -1,0 +1,10 @@
+﻿# Global safety policies
+no_delete: true
+no_overwrite: true
+allow_roots:
+  - .
+content_read_limits:
+  max_bytes: 65536
+  max_lines: 200
+require_human_ack: true
+auto_commit: false

@@ -1,0 +1,25 @@
+﻿{
+  "\": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DryRunReport",
+  "type": "object",
+  "required": ["plan_id","summary","safety_pass"],
+  "properties": {
+    "plan_id": { "type": "string" },
+    "summary": { "type": "string" },
+    "conflicts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "op_index": { "type": "integer" },
+          "reason": { "type": "string" },
+          "suggestions": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "would_create": { "type": "array", "items": { "type": "string" } },
+    "would_modify": { "type": "array", "items": { "type": "string" } },
+    "would_remove_dirs": { "type": "array", "items": { "type": "string" } },
+    "safety_pass": { "type": "boolean" }
+  }
+}

@@ -1,0 +1,13 @@
+﻿# OS
+.DS_Store
+Thumbs.db
+
+# Node / Python / misc
+node_modules/
+.env
+.venv/
+__pycache__/
+*.pyc
+
+# Tooling
+.staging/
